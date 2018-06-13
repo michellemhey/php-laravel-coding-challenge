@@ -6,7 +6,7 @@
       <thead>
         <tr>
           <th>Name</th>
-          <th>Email</th>
+          <th>Country</th>
           <th>Gender</th>
         </tr>
       </thead>
@@ -14,7 +14,7 @@
         @foreach($users as $user)
           <tr>
             <td><a href="/users/{{$user->id}}">{{$user->first_name}} {{$user->last_name}}</a></td>
-            <td>{{$user->email}}</td>
+            <td>{{$user->country}}</td>
             <td>{{$user->gender}}</td>
           </tr>
         @endforeach

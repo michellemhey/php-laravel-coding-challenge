@@ -46,14 +46,12 @@ class UserController extends Controller
         $userIp = $this->getUserIp();
         $genderData = $this->getGenderData($request->first_name, $userIp);
 
-        var_dump($userIp); die;
-
-        $user = User::create(['first_name' => $request->first_name, 'last_name' => $request->last_name, 'gender' => $genderData->getGender(), 'email' => $request->email]);
+        $user = User::create(['first_name' => $request->first_name, 'last_name' => $request->last_name, 'gender' => $genderData->getGender(), 'country' => $userIp, 'email' => $request->email]);
 
         if ($genderData->getAccuracy() < 70) {           
             return redirect('/users/' .$user->id.'/edit');
         } 
-        
+
         return redirect('/users/' .$user->id);
     }
 
@@ -115,7 +113,7 @@ class UserController extends Controller
             if($query && $query['status'] == 'success') {
                 return $query['country'];
             } else {
-                return 'Unable to get location';
+                return 'Country N/A';
             }
         }
 
