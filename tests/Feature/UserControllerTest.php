@@ -42,7 +42,7 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $response = $this->followingRedirects()
             ->call('POST', '/users', ['first_name' => 'Mary', 'last_name' => $last_name = $this->faker()->name, 'gender' => 'female', 'country' => 'US', 'email' => $email = $this->faker()->unique()->safeEmail])
@@ -53,7 +53,8 @@ class UserControllerTest extends TestCase
         $user = User::whereEmail($email)->first();
     }
 
-    public function testEdit() {
+    public function testEdit(): void
+    {
         $user = factory(User::class)->create();
 
         $response = $this->call('GET', "/users/{$user->id}");
@@ -61,7 +62,8 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testUpdate() {
+    public function testUpdate(): void
+    {
         $user = factory(User::class)->create();
         
         $response = $this->followingRedirects()

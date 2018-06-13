@@ -97,49 +97,48 @@ class UserController extends Controller
     }
 
     protected function getUserIp()
-        {
-            if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-                $ip = $_SERVER['HTTP_CLIENT_IP'];
-            } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            } else if (!empty($_SERVER['REMOTE_ADDR'])) {
-                $ip = $_SERVER['REMOTE_ADDR'];
-            } else {
-                $ip = false;
-            }
-          
-            $query = @unserialize(file_get_contents('http://ip-api.com/php/'.$ip));
-            
-            if($query && $query['status'] == 'success') {
-                return $query['country'];
-            } else {
-                return 'Country N/A';
-            }
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else if (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        } else {
+            $ip = false;
         }
+      
+        $query = @unserialize(file_get_contents('http://ip-api.com/php/'.$ip));
+        
+        if($query && $query['status'] == 'success') {
+            return $query['country'];
+        } else {
+            return 'Country N/A';
+        }
+    }
 
     protected function getGenderData($first_name = '')
-        {
-            if (empty($first_name)) {
-                echo 'Exception: user name required';
-                return;
-            }
-
-            try {
-                $apiClient = new GenderApiClient('sCGwxJoUHhwrrygkts');
-
-                // Query a single name
-                if (!empty($userIp)) {
-                    $lookup = $apiClient->getByFirstNameAndClientIpAddress($first_name, $userIp);
-                    // $lookup = $apiClient->getByFirstNameAndLocale($first_name, $userLocale);
-                } else {
-                    $lookup = $apiClient->getByFirstName($first_name);
-                }
-                
-                if ($lookup->genderFound()) { 
-                    return $lookup;      // female
-                }
-            } catch (GenderApi\Exception $e) {
-                echo 'Exception: ' . $e->getMessage();
-            }
+    {
+        if (empty($first_name)) {
+            echo 'Exception: user name required';
+            return;
         }
+
+        try {
+            $apiClient = new GenderApiClient('sCGwxJoUHhwrrygkts');
+
+            // Query a single name
+            if (!empty($userIp)) {
+                $lookup = $apiClient->getByFirstNameAndClientIpAddress($first_name, $userIp);
+            } else {
+                $lookup = $apiClient->getByFirstName($first_name);
+            }
+            
+            if ($lookup->genderFound()) { 
+                return $lookup;
+            }
+        } catch (GenderApi\Exception $e) {
+            echo 'Exception: ' . $e->getMessage();
+        }
+    }
 }
