@@ -11,11 +11,7 @@
     <main role="main" class="container">
 
       <div class="starter-template">
-        <div class="row">
-           <div class="col-sm-8">
-            @yield('content')
-          </div>
-        </div>
+        @yield('content')
       </div>
 
     </main><!-- /.container -->

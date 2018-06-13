@@ -13,7 +13,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $users = User::all();
         return view('users.index', compact('users', $users));
@@ -29,7 +29,46 @@ class UserController extends Controller
         return view('users.create');
     }
 
-     /**
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'email' => 'required',
+        ]);
+
+        $userIp = $this->getUserIp();
+        $genderData = $this->getGenderData($request->first_name, $userIp);
+
+        var_dump($userIp); die;
+
+        $user = User::create(['first_name' => $request->first_name, 'last_name' => $request->last_name, 'gender' => $genderData->getGender(), 'email' => $request->email]);
+
+        if ($genderData->getAccuracy() < 70) {           
+            return redirect('/users/' .$user->id.'/edit');
+        } 
+        
+        return redirect('/users/' .$user->id);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\User  $user
+     * @return \Illuminate\Http\Response
+     */
+    public function show(User $user)
+    {
+        return view('users.show', compact('user', $user));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\User  $user
@@ -49,11 +88,9 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //Validate
-        // $request->validate([
-        //     'title' => 'required|min:3',
-        //     'description' => 'required',
-        // ]);
+        $this->validate($request, [
+            'gender' => 'required',
+        ]);
         
         $user->gender = $request->gender;
         $user->save();
@@ -61,57 +98,28 @@ class UserController extends Controller
         return redirect('users');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $userIp = $this->getUserIp();
-        $genderData = $this->getGenderData($request->first_name, $userIp);
-        // $userLocation = $this->getUserIp();
-
-        $user = User::create(['first_name' => $request->first_name, 'last_name' => $request->last_name, 'gender' => $genderData->getGender(), 'email' => $request->email]);
-
-        if ($genderData->getAccuracy() < 70) {
-                        
-            return redirect('/users/' .$user->id.'/edit');
-        } 
-        return redirect('/users/' .$user->id);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function show(User $user)
-    {
-        return view('users.show', compact('user', $user));
-    }
-
-
-    protected function getUserIp() 
+    protected function getUserIp()
         {
-            if (!empty($_SERVER['HTTP_CLIENT_IP']))   
-            {
-              $ip=$_SERVER['HTTP_CLIENT_IP'];
+            if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+                $ip = $_SERVER['HTTP_CLIENT_IP'];
+            } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            } else if (!empty($_SERVER['REMOTE_ADDR'])) {
+                $ip = $_SERVER['REMOTE_ADDR'];
+            } else {
+                $ip = false;
             }
-            elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   
-            {
-              $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+          
+            $query = @unserialize(file_get_contents('http://ip-api.com/php/'.$ip));
+            
+            if($query && $query['status'] == 'success') {
+                return $query['country'];
+            } else {
+                return 'Unable to get location';
             }
-            else
-            {
-              $ip=$_SERVER['REMOTE_ADDR'];
-            }
-            return $ip;
         }
 
-    protected function getGenderData($first_name = '', $userIp = '')
+    protected function getGenderData($first_name = '')
         {
             if (empty($first_name)) {
                 echo 'Exception: user name required';
@@ -124,6 +132,7 @@ class UserController extends Controller
                 // Query a single name
                 if (!empty($userIp)) {
                     $lookup = $apiClient->getByFirstNameAndClientIpAddress($first_name, $userIp);
+                    // $lookup = $apiClient->getByFirstNameAndLocale($first_name, $userLocale);
                 } else {
                     $lookup = $apiClient->getByFirstName($first_name);
                 }
@@ -131,18 +140,7 @@ class UserController extends Controller
                 if ($lookup->genderFound()) { 
                     return $lookup;      // female
                 }
-
-                // // Query a full name and improve the result by providing a country code
-                // $lookup = $apiClient->getByFirstNameAndLastNameAndCountry('Thomas Johnson', 'US');
-                // if ($lookup->genderFound()) {
-                //     echo $lookup->getGender();      // male
-                //     echo $lookup->getFirstName();   // Thomas
-                //     echo $lookup->getLastName();    // Johnson
-                // }
-
             } catch (GenderApi\Exception $e) {
-                // Name lookup failed due to a network error or insufficient requests
-                // left. See https://gender-api.com/en/api-docs/error-codes
                 echo 'Exception: ' . $e->getMessage();
             }
         }
