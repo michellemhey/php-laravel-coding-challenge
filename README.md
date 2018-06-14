@@ -1,6 +1,6 @@
 # Laravel Code Challenge
 
-##Challenge
+## Challenge
 
 The following tasks should be performed using PHP and Laravel. The database you use should be relational, but beyond that it's your choice and it will have no bearing on the test. You are welcome to use any additional software packages you feel would help. Your results will be judged based on conformance to the spec, code quality and clarity, and user experience.
 
