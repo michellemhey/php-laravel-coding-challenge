@@ -13,7 +13,7 @@ means to specify their gender—"Male", "Female", or "Other".
 
 ## What I did
 
-I set up a users controller that does basic CRUD, as well as hit the Gender API endpoint and save the gender and country of the user based on their IP address. If the genders guess is below 70% they are redirected to a form where they can select a gender (male, female, or other) and save it to the user. I added tests for the controller functions. You can run 
+I set up a users controller that does basic CRUD, as well as hit the Gender API endpoint and saves the gender and the users country based on their IP address. The code is rendered in views. If the genders guess is below 70% they are redirected to a form where they can select a gender (male, female, or other) and save it to the user. I added tests for the controller functions. You can run 
 
 ```bash
 php vendor/bin/phpunit --testdox
